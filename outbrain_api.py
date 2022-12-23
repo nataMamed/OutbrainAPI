@@ -25,7 +25,7 @@ class OutbrainAPI:
         campaigns = requests.get(self.base_url + '/marketers/'+self.marketer_id+'/campaigns', headers={'OB-TOKEN-V1': self.auth_token}).json()['campaigns']
         campaign_list = []
         for campaign in campaigns:
-            campaign_list.append({'id':campaign['id'], 'name': campaign['name']})
+            campaign_list.append(campaign)
 
         return campaign_list
 
@@ -36,7 +36,7 @@ class OutbrainAPI:
         'OB-TOKEN-V1': self.auth_token
         }
         campaigns = self.list_campaigns()
-        campaign_data = {}
+        campaign_data = []
         for campaign in campaigns:
             
             url = f"https://api.outbrain.com/amplify/v0.1/reports/marketers/{self.marketer_id}/periodic?from={from_date}&to={to_date}&campaignId={campaign['id']}&limit=500&breakdown=daily" 
@@ -44,11 +44,18 @@ class OutbrainAPI:
             response = requests.request("GET", url, headers=headers, data=payload).json()
 
             campaign_results = response['results']
-
-            campaign_data[campaign['id']] = campaign_results
+            temp = []
+            
+            for unique_result in campaign_results:
+                unique_result['campaign_id'] = campaign['id']
+                unique_result['campaign_name'] = campaign['name']
+                campaign_data.append(unique_result)
+                
             
 
         return campaign_data
+
+
 
 
 
